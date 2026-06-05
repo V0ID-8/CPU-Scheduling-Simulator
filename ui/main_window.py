@@ -13,6 +13,7 @@ from ui.controls_bar import ControlsBarWidget
 from ui.gantt_chart import GanttChartWidget
 from ui.results_table import ResultsTableWidget
 from algorithms.scheduler import run_scheduler
+from utils.validators import validate_processes, validate_quantum
 
 
 # Maps the full dropdown label to the short key the router expects
@@ -28,12 +29,43 @@ class MainWindow:
     def __init__(self):
         self.root = tk.Tk()
         self.root.title("CPU Scheduling Simulator")
-        self.root.geometry("1100x700")
+        self.root.geometry("1100x720")
         self.root.configure(bg=theme.BG_PRIMARY)
         self.root.resizable(False, False)
 
+        # Intercept the window close button
+        self.root.protocol("WM_DELETE_WINDOW", self._on_close)
+
+        self._build_title_bar()
         self._build_layout()
         self._wire_controls()
+
+    # ------------------------------------------------------------------
+    # Title bar
+    # ------------------------------------------------------------------
+
+    def _build_title_bar(self):
+        """Renders a styled title bar at the very top of the window."""
+        title_frame = tk.Frame(self.root, bg=theme.BG_PRIMARY, pady=6)
+        title_frame.pack(fill=tk.X, padx=14, pady=(8, 0))
+
+        tk.Label(
+            title_frame,
+            text="CPU Scheduling Simulator",
+            bg=theme.BG_PRIMARY,
+            fg=theme.TEXT_HEADER,
+            font=("Segoe UI", 14, "bold"),
+            anchor=tk.W,
+        ).pack(side=tk.LEFT)
+
+        tk.Label(
+            title_frame,
+            text="FCFS  |  SJF  |  Round Robin  |  Priority",
+            bg=theme.BG_PRIMARY,
+            fg=theme.TEXT_SECONDARY,
+            font=theme.FONT_SMALL,
+            anchor=tk.E,
+        ).pack(side=tk.RIGHT)
 
     # ------------------------------------------------------------------
     # Layout
@@ -46,9 +78,8 @@ class MainWindow:
           - bottom    : controls bar
         """
 
-        # Top area
         top_frame = tk.Frame(self.root, bg=theme.BG_PRIMARY)
-        top_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=(10, 0))
+        top_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=(8, 0))
 
         # Left panel — process input
         self.left_frame = tk.Frame(
@@ -101,8 +132,6 @@ class MainWindow:
         Validates inputs, dispatches to the scheduler,
         and updates the Gantt chart and results table.
         """
-        from utils.validators import validate_processes, validate_quantum
-
         processes = self.process_table.get_processes()
         label = self.controls_bar.get_algorithm()
         algorithm_key = ALGORITHM_KEY_MAP.get(label, "FCFS")
@@ -114,7 +143,7 @@ class MainWindow:
             messagebox.showwarning("Invalid Input", error)
             return
 
-        # Validate quantum if Round Robin is selected
+        # Validate quantum only for Round Robin
         if algorithm_key == "RR":
             valid, error = validate_quantum(quantum)
             if not valid:
@@ -127,18 +156,27 @@ class MainWindow:
             messagebox.showerror("Simulation Error", str(e))
             return
 
-        # Update the Gantt chart
+        # Update Gantt chart
         self.gantt_chart.render(
             timeline=result["timeline"],
             title=label,
         )
 
-        # Update the results table
+        # Update results table
         self.results_table.render(
             results=result["results"],
             avg_wt=result["avg_waiting_time"],
             avg_tat=result["avg_turnaround_time"],
         )
+
+    # ------------------------------------------------------------------
+    # Window close
+    # ------------------------------------------------------------------
+
+    def _on_close(self):
+        """Prompt the user before closing the application."""
+        if messagebox.askokcancel("Quit", "Are you sure you want to exit?"):
+            self.root.destroy()
 
     # ------------------------------------------------------------------
     # Entry point

@@ -1,11 +1,31 @@
+# Python
 __pycache__/
 *.py[cod]
 *.pyo
+*.pyd
+.Python
+
+# Virtual environments
 .env
 .venv
 venv/
-*.egg-info/
+ENV/
+
+# Distribution / packaging
 dist/
 build/
+*.egg-info/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
 .DS_Store
 Thumbs.db
+desktop.ini
+
+# Matplotlib cache
+.matplotlib/
