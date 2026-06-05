@@ -1,6 +1,6 @@
 # CPU Scheduling Simulator
 
-![CPU Scheduling Simulator](assets/screenshot.png)
+![CPU Scheduling Simulator](assets/Screenshot.png)
 
 
 A desktop application that simulates four classic CPU scheduling algorithms with a real-time Gantt chart and per-process metrics. Built with Python and Tkinter, it makes operating system scheduling theory visual and measurable.
