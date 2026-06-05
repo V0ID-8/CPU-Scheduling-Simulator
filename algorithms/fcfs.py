@@ -65,6 +65,6 @@ def run_fcfs(processes: list[dict]) -> dict:
     return {
         "timeline": timeline,
         "results": results,
-        "average_waiting_time": averages["average_waiting_time"],
-        "average_turnaround_time": averages["average_turnaround_time"],
+        "avg_waiting_time": averages["avg_waiting_time"],
+        "avg_turnaround_time": averages["avg_turnaround_time"],
     }
