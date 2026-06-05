@@ -98,22 +98,28 @@ class MainWindow:
     def _on_run(self):
         """
         Called when the Run button is clicked.
-        Reads processes and settings, dispatches to the scheduler,
+        Validates inputs, dispatches to the scheduler,
         and updates the Gantt chart and results table.
         """
+        from utils.validators import validate_processes, validate_quantum
+
         processes = self.process_table.get_processes()
-
-        if not processes:
-            messagebox.showwarning(
-                "No Processes",
-                "Please add at least one process before running.",
-            )
-            return
-
-        # Resolve the algorithm key from the dropdown label
         label = self.controls_bar.get_algorithm()
         algorithm_key = ALGORITHM_KEY_MAP.get(label, "FCFS")
         quantum = self.controls_bar.get_quantum()
+
+        # Validate processes
+        valid, error = validate_processes(processes)
+        if not valid:
+            messagebox.showwarning("Invalid Input", error)
+            return
+
+        # Validate quantum if Round Robin is selected
+        if algorithm_key == "RR":
+            valid, error = validate_quantum(quantum)
+            if not valid:
+                messagebox.showwarning("Invalid Quantum", error)
+                return
 
         try:
             result = run_scheduler(algorithm_key, processes, quantum)
